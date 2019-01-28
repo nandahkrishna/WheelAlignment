@@ -9,7 +9,7 @@
 using namespace std;
 using namespace cv;
 
-void detect(String imgpath, float &xret, float &yret)
+void detect(String imgpath, float &xret, float &yret, float &iw)
 {
     Mat imgOriginal;
     Mat ip;
@@ -28,6 +28,8 @@ void detect(String imgpath, float &xret, float &yret)
         cout << "Error: Image not loaded\n";
         return;
     }
+    
+    iw = ip.size().height;
     
     Point2f vtx[4];
     Point2f A;
@@ -64,15 +66,15 @@ void detect(String imgpath, float &xret, float &yret)
     }
     
     ellipse(imgOriginal,selEllipses[0],(255,255,255),10);
-    cout<<"Center x, y: "<<selEllipses[0].center.x<<", "<<selEllipses[0].center.y<<"\n"<<"";
+    //cout<<"Center x, y: "<<selEllipses[0].center.x<<", "<<selEllipses[0].center.y<<"\n"<<"";
     xret = selEllipses[0].center.x;
     yret = selEllipses[0].center.y;
     double k = selEllipses[0].size.height/selEllipses[0].size.width;
     double w = selEllipses[0].angle*3.14/180;
     double al, be;
-    al = sqrt(-((cos(w)*cos(w)*(k*k-1))/(pow(sin(w),2)*(1-k*k)-1)));
-    be = sqrt(-(sin(w)*sin(w)*(1-k*k)));
-    cout<<"a, b: "<<asin(al)*180/3.14<<", "<<asin(be)*180/3.14<<"\n";
+    //al = sqrt(-((cos(w)*cos(w)*(k*k-1))/(pow(sin(w),2)*(1-k*k)-1)));
+    //be = sqrt(-(sin(w)*sin(w)*(1-k*k)));
+    //cout<<"a, b: "<<asin(al)*180/3.14<<", "<<asin(be)*180/3.14<<"\n";
     
     img = imgOriginal.clone();
     pyrDown(imgOriginal, ip, Size(imgOriginal.cols / 2, imgOriginal.rows / 2)); //2
@@ -86,16 +88,27 @@ void detect(String imgpath, float &xret, float &yret)
 int main()
 {
     int imgno;
-    float xl, xr, yl, yr;
+    float xl, xr, yl, yr, iw;
+    float X, Y, Z;
     cout<<"Image number: ";
     cin>>imgno;
     String imgcam1 = "Images/Cam1/CAM1_"+to_string(imgno)+".jpg";
     String imgcam2 = "Images/Cam2/CAM1_"+to_string(imgno)+".jpg";
-    cout<<"\nCam 1:\n";
-    detect(imgcam1, xl, yl);
-    cout<<"\nCam 2:\n";
-    detect(imgcam2, xr, yr);
+    //cout<<"\nCam 1:\n";
+    detect(imgcam1, xl, yl, iw);
+    //cout<<"\nCam 2:\n";
+    detect(imgcam2, xr, yr, iw);
     float f, b, d;
+    // Given vertical viewing angle 28 degrees = 0.4887 rad
+    f = iw/(2*tan(0.4887/2));
+    // Assuming baseline width of 5 cm = 0.05 m
+    b = 0.05;
     d = fabs(xr-xl);
+    Z = f*b/d;
+    X = xl*Z/f;
+    Y = yl*Z/f;
+    cout<<"\nX, Y: "<<X<<", "<<Y<<endl;
+    cout<<"Z: "<<Z<<endl;
+    cout<<"D: "<<sqrt(X*X+Y*Y+Z*Z)<<endl<<endl;
     waitKey(0);
 }
