@@ -28,6 +28,8 @@ void detect(String imgpath, float &xret, float &yret, float &iw)
         cout << "Error: Image not loaded\n";
         return;
     }
+
+    bitwise_not(ip, ip);
     
     iw = ip.size().height;
     
@@ -36,9 +38,9 @@ void detect(String imgpath, float &xret, float &yret, float &iw)
     Point2f B;
     
     imgOriginal = ip;
-    pyrUp(imgOriginal, imgOriginal, Size(imgOriginal.cols * 2, imgOriginal.rows * 2));
+    //pyrUp(imgOriginal, imgOriginal, Size(imgOriginal.cols * 2, imgOriginal.rows * 2));
     
-    Canny(imgOriginal, imgEdges, 10, 20);
+    Canny(imgOriginal, imgEdges, 120, 240);
     
     findContours(imgEdges, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
     
@@ -59,6 +61,7 @@ void detect(String imgpath, float &xret, float &yret, float &iw)
     }
     
     for(ci = 1; ci < cj; ci++) {
+        ellipse(imgOriginal,selEllipses[ci],(255,255,255),10);
         if(contourArea(selcontours[ci])>contourArea(selcontours[0])) {
             selEllipses[0] = selEllipses[ci];
             selcontours[0] = selcontours[ci];
@@ -77,9 +80,9 @@ void detect(String imgpath, float &xret, float &yret, float &iw)
     //cout<<"a, b: "<<asin(al)*180/3.14<<", "<<asin(be)*180/3.14<<"\n";
     
     img = imgOriginal.clone();
-    pyrDown(imgOriginal, ip, Size(imgOriginal.cols / 2, imgOriginal.rows / 2)); //2
+    //pyrDown(imgOriginal, ip, Size(imgOriginal.cols / 2, imgOriginal.rows / 2)); //2
     resize(img, img, Size(img.cols/4, img.rows/4)); //try
-    namedWindow("rims"+imgpath, CV_WINDOW_AUTOSIZE);
+    namedWindow("rims"+imgpath, WINDOW_AUTOSIZE);
     imshow("rims"+imgpath, img);
     
     return;
@@ -90,14 +93,14 @@ int main()
     int imgno;
     float xl, xr, yl, yr, iw;
     float X, Y, Z;
-    cout<<"Image number: ";
-    cin>>imgno;
-    String imgcam1 = "Images/Cam1/CAM1_"+to_string(imgno)+".jpg";
-    String imgcam2 = "Images/Cam2/CAM1_"+to_string(imgno)+".jpg";
+    //cout<<"Image number: ";
+    //cin>>imgno;
+    String imgcam1 = "TouchLess2019/U3TL0001/Positive y/U3TL0001_021_30'.jpg";
+    String imgcam2;
     //cout<<"\nCam 1:\n";
     detect(imgcam1, xl, yl, iw);
     //cout<<"\nCam 2:\n";
-    detect(imgcam2, xr, yr, iw);
+    //detect(imgcam2, xr, yr, iw);
     float f, b, d;
     // Given vertical viewing angle 28 degrees = 0.4887 rad
     f = iw/(2*tan(0.4887/2));
@@ -107,8 +110,8 @@ int main()
     Z = f*b/d;
     X = xl*Z/f;
     Y = yl*Z/f;
-    cout<<"\nX, Y: "<<X<<", "<<Y<<endl;
-    cout<<"Z: "<<Z<<endl;
-    cout<<"D: "<<sqrt(X*X+Y*Y+Z*Z)<<endl<<endl;
+    //cout<<"\nX, Y: "<<X<<", "<<Y<<endl;
+    //cout<<"Z: "<<Z<<endl;
+    //cout<<"D: "<<sqrt(X*X+Y*Y+Z*Z)<<endl<<endl;
     waitKey(0);
 }
