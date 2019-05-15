@@ -29,7 +29,9 @@ void detect(String imgpath, float &xret, float &yret, float &iw)
         return;
     }
 
-    bitwise_not(ip, ip);
+    //bitwise_not(ip, ip);
+    Mat kernel = getStructuringElement(MORPH_RECT, Size(5, 5), Point(2, 2));
+    morphologyEx(ip, ip, MORPH_CLOSE, kernel, Point(-1,-1), 7);
     
     iw = ip.size().height;
     
@@ -61,7 +63,7 @@ void detect(String imgpath, float &xret, float &yret, float &iw)
     }
     
     for(ci = 1; ci < cj; ci++) {
-        ellipse(imgOriginal,selEllipses[ci],(255,255,255),10);
+        //ellipse(imgOriginal,selEllipses[ci],(255,255,255),10);
         if(contourArea(selcontours[ci])>contourArea(selcontours[0])) {
             selEllipses[0] = selEllipses[ci];
             selcontours[0] = selcontours[ci];
@@ -75,9 +77,9 @@ void detect(String imgpath, float &xret, float &yret, float &iw)
     double k = selEllipses[0].size.height/selEllipses[0].size.width;
     double w = selEllipses[0].angle*3.14/180;
     double al, be;
-    //al = sqrt(-((cos(w)*cos(w)*(k*k-1))/(pow(sin(w),2)*(1-k*k)-1)));
-    //be = sqrt(-(sin(w)*sin(w)*(1-k*k)));
-    //cout<<"a, b: "<<asin(al)*180/3.14<<", "<<asin(be)*180/3.14<<"\n";
+    al = sqrt(-((cos(w)*cos(w)*(k*k-1))/(pow(sin(w),2)*(1-k*k)-1)));
+    be = sqrt(-(sin(w)*sin(w)*(1-k*k)));
+    cout<<"a, b: "<<asin(al)*180/3.14<<", "<<asin(be)*180/3.14<<"\n";
     
     img = imgOriginal.clone();
     //pyrDown(imgOriginal, ip, Size(imgOriginal.cols / 2, imgOriginal.rows / 2)); //2
@@ -95,23 +97,23 @@ int main()
     float X, Y, Z;
     //cout<<"Image number: ";
     //cin>>imgno;
-    String imgcam1 = "TouchLess2019/U3TL0001/Positive y/U3TL0001_021_30'.jpg";
-    String imgcam2;
+    String imgcam1 = "TouchLess2019/U3TL0001/Negative x/U3TL0001_021_1d.jpg";
+    String imgcam2 = "TouchLess2019/U3TL0002/Negative x/U3TL0002_021_1d.jpg";
     //cout<<"\nCam 1:\n";
     detect(imgcam1, xl, yl, iw);
     //cout<<"\nCam 2:\n";
-    //detect(imgcam2, xr, yr, iw);
+    detect(imgcam2, xr, yr, iw);
     float f, b, d;
     // Given vertical viewing angle 28 degrees = 0.4887 rad
     f = iw/(2*tan(0.4887/2));
-    // Assuming baseline width of 5 cm = 0.05 m
-    b = 0.05;
+    // Assuming baseline width of 20 cm = 0.2 m
+    b = 0.2;
     d = fabs(xr-xl);
     Z = f*b/d;
     X = xl*Z/f;
     Y = yl*Z/f;
-    //cout<<"\nX, Y: "<<X<<", "<<Y<<endl;
-    //cout<<"Z: "<<Z<<endl;
-    //cout<<"D: "<<sqrt(X*X+Y*Y+Z*Z)<<endl<<endl;
+    cout<<"\nX, Y: "<<X<<", "<<Y<<endl;
+    cout<<"Z: "<<Z<<endl;
+    cout<<"D: "<<sqrt(X*X+Y*Y+Z*Z)<<endl<<endl;
     waitKey(0);
 }

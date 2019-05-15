@@ -1,2 +1,2 @@
-/usr/bin/g++ out.cpp -o out.out -w  `pkg-config --cflags --libs opencv`
+g++ -w out.cpp -o out.out `pkg-config --cflags --libs opencv`
 ./out.out
