@@ -31,7 +31,7 @@ void detect(String imgpath, float &xret, float &yret, float &iw)
 
     //bitwise_not(ip, ip);
     Mat kernel = getStructuringElement(MORPH_RECT, Size(5, 5), Point(2, 2));
-    morphologyEx(ip, ip, MORPH_CLOSE, kernel, Point(-1,-1), 7);
+    morphologyEx(ip, ip, MORPH_CLOSE, kernel, Point(-1,-1), 4);
     
     iw = ip.size().height;
     
